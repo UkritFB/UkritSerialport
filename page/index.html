@@ -26,51 +26,73 @@ Kobori4268@gmail.com
     <a class="head">Temp Control</a>
   </div>
   <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
-  <center><a ">In Box:</a>  <a class="tmp" >0<a >&#176;C</a></a></center>
-  <center><a >Out Box:</a>  <a class="tmp2" >0<a>&#176;C</a></a></center>
-  <center><a >Water:</a>   <a class="tmp3" >0<a>&#176;C</a></a></center>
-  <center><a >Cool Fin:</a>     <a class="tmp4" >0<a>&#176;C</a></a></center>
-  <center><a >Hot Fin:</a>  <a class="tmp5">0<a>&#176;C</a></a></center>
-  <center><a >System:</a><a class="tmp5">0<a>&#176;C</a></a></center>
+  <br>
+  <div class="container">
+    <div class="flex-item">
+      <center><a class="tmp" style="font-size: 60px" >Load..<a>&#176;C</a></center>
+      <center><a class="Main_temp" >In-Box:</a></center>
+    </div>
+    <div class="flex-item">
+      <br> <br>
+      <a >Water:</a>    <a class="tmp3">Load..    <a>&#176;C</a></a><br>
+     <a >Cool-Fin:</a> <a class="tmp4">Load..    <a>&#176;C</a></a>
+
+   </div>
+ </div>
+
+ <div class="container">
+  <div class="flex-item">
+    <center><a class="tmp2" style="font-size: 60px">Load..<a>&#176;C</a></center>
+    <center><a >Out-Box:</a></center>
+
+  </div>
+  <div class="flex-item">
+
+    <a >Hot-Fin:</a>  <a class="tmp5">Load..    <a>&#176;C</a></a><br>
+   <a >System:</a>   <a class="tmp5">Load..    <a>&#176;C</a></a>
+  </div>
+</div>
 
 
-  <main>
-    <div>
-      <img  class="icon" src="/images/setting.png" align="middle">
-      <a>Setting Temparature & Humidit</a>
-      <br>
-    </div>
+
+<br><br>
+<main>
+  <div>
+    <img  class="icon" src="/images/setting.png" align="middle">
+    <a>Setting Temparature & Humidit</a>
     <br>
-    <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
-    <div>
-      <img  class="icon" src="/images/temp.png" align="middle">
-      <a>Temparature</a>
-      <a style="float: right;">Temp : <span id="demo"></span> &#8451;</a>
+  </div>
+  <br>
+  <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+  <div>
+    <img  class="icon" src="/images/temp.png" align="middle">
+    <a>Temparature</a>
+    <a style="float: right;">Temp : <span id="demo"></span> &#8451;</a>
+  </div>
+  <center>
+    <div id="slidecontainer">
+      <input type="range" min="20" max="30" value="0" class="slider" id="myRange">
     </div>
-    <center>
-      <div id="slidecontainer">
-        <input type="range" min="20" max="30" value="0" class="slider" id="myRange">
-      </div>
-    </center>
-    <br>
-    <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
-    <div> 
-      <img  class="icon" src="/images/hum.png" align="middle">
-      <a> Humidit</a> 
-      <a style="float: right;">Hum : <span id="demo1"></span>%</a>
+  </center>
+  <br>
+  <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+  <div> 
+    <img  class="icon" src="/images/hum.png" align="middle">
+    <a> Humidit</a> 
+    <a style="float: right;">Hum : <span id="demo1"></span>%</a>
+  </div>
+  <center>
+    <div id="slidecontainer">
+      <input type="range" min="1" max="100" value="0" class="slider" id="myRange1">
     </div>
-    <center>
-      <div id="slidecontainer">
-        <input type="range" min="1" max="100" value="0" class="slider" id="myRange1">
-      </div>
-    </center>
-    <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
-    <center><button class="button" onclick="send_data()">Save</button></center>
-    <center> <a id="textupdate">Data Loading....</a></center>
-    <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
-  </main>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/javascripts/javascript.js"></script>
-  <!--    <script src="/javascripts/page_change.js"></script> -->
+  </center>
+  <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+  <center><button class="button" onclick="send_data()">Save</button></center>
+  <center> <a id="textupdate">Data Loading....</a></center>
+  <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+</main>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/javascripts/javascript.js"></script>
+<!--    <script src="/javascripts/page_change.js"></script> -->
 </body>
 </html>
