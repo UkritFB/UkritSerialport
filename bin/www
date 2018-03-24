@@ -1,0 +1,476 @@
+#!/usr/bin/env node
+/**
+ * Module dependencies.
+ */
+ var app          = require('../app');
+ var debug        = require('debug')('ukritsocket:server');
+ var http         = require('http');
+ var MongoClient  = require('mongodb').MongoClient;
+
+ var serialPort   = require("serialport"); //for nodejs v4
+ var sPort        = null;
+
+ var Temp_user    = 0;
+ var Temp_data    = 0;
+ var event        =  require('events'); 
+// Connection URL
+var url           = 'mongodb://localhost:27017/tempcontrol_db';
+/**
+ * Get port from environment and store in Express.
+ */
+ var port         = normalizePort(process.env.PORT || '80');
+ app.set('port', port);
+/**
+ * Create HTTP server.
+ */
+ var server       = http.createServer(app);
+/*
+ Create socket.io
+ */
+ var io           = require('socket.io')(server);
+/*
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+ system();
+ server.listen(port);
+ server.on('error', onError);
+ server.on('listening', onListening);
+ ///////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////
+io.on('connection', function (socket,callback) {
+  event.EventEmitter.prototype._maxListeners = 100;
+
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var query = {};
+    var sort = { _id: -1};
+    db.collection("temp_collection").find(query).sort(sort).toArray(function(err, result) {
+      if (err) throw err;
+      socket.emit('get_setting',{user_temp:result[0].user_temp,user_hum:result[0].user_hum,time:result[0].time});
+      // socket.emit('get_setting',{user_temp:15,user_hum:20,time:30});
+      // console.log(result[0]);
+      // console.log(result[0].time+result[0].user_temp+result[0].user_hum);
+      // socket.emit('Send-data-web', {data:result[0].time});
+      db.close();
+    });
+  }); 
+
+  // socket.emit('Send-data-web', {data:da});
+  socket.on('Recive-data-web', function (data) {
+    console.log(data);
+    var user_temp = data.user_temp;
+    var user_hum = data.user_hum;
+    var temp3 = 25;
+    var hum1  = 25;
+    var myDate = new Date();
+    var datetime = myDate.setHours(myDate.getHours() + 7);
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      var myobj = [{ time:myDate,user_temp:user_temp,user_hum:user_hum,temp3:temp3,hum1:hum1}];
+      db.collection("temp_collection").insertMany(myobj, function(err, res) {
+        if (err) throw err;
+        console.log("Number of documents inserted: " + res.insertedCount);
+        db.close();
+      });
+
+      var query = {};
+      var sort = { _id: -1 }
+
+      db.collection("temp_collection").find(query).sort(sort).toArray(function(err, result) {
+        if (err) throw err;
+        // socket.emit('recive_timeupdate',{time:result[0].time});
+        // console.log()
+        db.close();
+      });
+      // db.collection("tempareture").find(query).sort(sort).toArray(function(err, result) {
+      //   if (err) throw err;
+      //   socket.emit('recive_timeupdate',{time:result[0].time});
+      //   db.close();
+      // });
+    });
+  });
+}); 
+///////////////////////////////////////////////////////////////////////////////////
+
+// Create Collection //////////////////////////////////////////////////////////////
+MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  db.createCollection("temp_collection", function(err, res) {
+    if (err) throw err;
+    console.log("Collection created!");
+    db.close();
+  });
+}); 
+///////////////////////////////////////////////////////////////////////////////////
+
+///insert data ////////////////////////////////////////////////////////////////////
+// var temp1 = "UU";
+// // var temp1 = user_temp;
+// var temp2 = 25;
+// var temp3 = 25;
+// var hum1  = 25;
+// var myDate = new Date();
+// var datetime = myDate.setHours(myDate.getHours() + 7);
+// MongoClient.connect(url, function(err, db) {
+//   if (err) throw err;
+//   var myobj = [
+//     { time:myDate,temp1:temp1,temp2:temp2,temp3:temp3,hum1:hum1}
+//   ];
+//   db.collection("temp_collection").insertMany(myobj, function(err, res) {
+//     if (err) throw err;
+//     console.log("Number of documents inserted: " + res.insertedCount);
+//     db.close();
+//   });
+//        var myobj = [{ time:00,temperature:00}];
+//     db.collection("tempareture").insertMany(myobj, function(err, res) {
+//       if (err) throw err;
+//       // console.log("Number of documents inserted: " + res.insertedCount);
+//       db.close();
+//     });
+// });
+///////////////////////////////////////////////////////////
+
+
+//////////////////////////////////// information Server //////////////////
+function system(callback)
+{
+  console.log("System");
+  var os = require('os');
+  var hostIP = '';
+  var macAddr = '';
+  var netMask = '';
+  var cpu = os.cpus();
+  console.log('');
+  console.log('###################################');
+  console.log('#   Server Temp Control By Ukrit  #');
+  console.log('###################################');
+  console.log(cpu.length+'-Core', os.cpus()[0].model);
+  console.log('Total mem', os.totalmem());
+  console.log('Free mem', os.freemem());
+  console.log('Found', os.platform(), os.release());
+  console.log('###################################');
+  console.log('');
+  console.log('');
+}
+///////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////
+/**
+ * Normalize a port into a number, string, or false.
+ */
+ function normalizePort(val) {
+  console.log("normalizePort");
+  var port = parseInt(val, 10);
+  if (isNaN(port)) {
+        // named pipe
+        return val;
+      }
+      if (port >= 0) {
+        // port number
+        return port;
+      }
+      return false;
+    }
+///////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////
+/**
+ * Event listener for HTTP server "error" event.
+ */
+ function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+  var bind = typeof port === 'string'
+  ? 'Pipe ' + port
+  : 'Port ' + port;
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+    console.error(bind + ' requires elevated privileges');
+    process.exit(1);
+    break;
+    case 'EADDRINUSE':
+    console.error(bind + ' is already in use');
+    process.exit(1);
+    break;
+    default:
+    throw error;
+  }
+}
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+ function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+  ? 'pipe ' + addr
+  : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
+/////////////////////////////////////////////////////////////////////////////////////
+
+//Serial port////////////////////////////////////////////////////////////////////////
+function serialList (callback)  {
+  console.log("------->1");
+  sportName = [];
+  serialPort.list(function (err, ports) {////for nodejs v4.. up  //edit by mang
+    for (var i in ports)  {
+      var portName = ports[i].comName;
+      // if (portName == '/dev/ttyUSB0')  {
+        if (portName == '/dev/ttyUSB0')  {
+        //console.log('Serial-list ->', portName);
+        callback(portName);
+        return;
+      }
+    }
+    callback('');
+  });
+}
+///////////////////////////////////////////////////////////////////////////////////
+/*
+// Serial port write data
+*/
+function writeSerialPort (sock, data, callback) {       //for nodejs v4.. up
+  console.log("-----------------------------------");
+  // console.log(sock);
+  sock.write(data+'\u0000', function () {
+    sock.drain(callback);
+  });
+}
+/* 
+// Serial init & recieve data 
+*/
+function serialInit (callback) {
+  console.log("------->3");
+  serialList(function(portName)  {
+    if (portName == '')  {
+      console.log('Serial port not found...');
+      callback(-1);
+      return;
+    }
+    // console.log('Serial port name ->',portName);
+    var sPort = new serialPort(portName, {
+      // baudrate: 115200,
+      baudrate: 9600,
+      autoOpen: false,
+      //autoOpen: true
+    }); // this is the openImmediately flag [default is true]
+    
+    sPort.open();
+
+    sPort.on('open', function() {
+      console.log(portName, 'baudrate ->', sPort.options.baudRate);
+      callback(sPort);
+    });   
+
+    sPort.on("close", function () {
+      console.log('Serial port closed...',portName);
+    });
+
+    sPort.on('error', function(err) {
+      console.log(err);
+    });
+
+    var tempBuff = '';
+    var endLine = -1;
+
+    sPort.on("data", function (_data) {
+      var data = _data+'';
+      endLine = data.indexOf('\n');
+      // console.log('Temp-data ->',data, endLine);
+      if (endLine == -1) { 
+        tempBuff += data;
+      }
+      else {
+        // data = data.split('\u0000').join('');
+        var sportBuff = tempBuff+data;
+        tempBuff = '';
+        console.log('Recive-data-Arduino--->',sportBuff);
+        SaveTemp(sportBuff);
+        if (sPort != null)  {
+          // var text = 'R';
+          // writeSerialPort(sPort, text, function()  {  
+          //   console.log('Send-dataArduino----->', text);
+          // })
+        }
+      }
+    });  
+  })
+}
+//Save Temp Fron ////////////////////////////////////////////////////////////////////
+function SaveTemp(temp)
+{
+  var myDate = new Date();
+  var dd = myDate.toString();
+  var y = dd.substring(11,15);
+  var m = dd.substring(4,7);
+  var d = dd.substring(8,10);
+  var date_db_date = y+m+d;
+  var date_db = date_db_date.toString();
+  // console.log( dd);
+  // console.log( y+m+d);
+
+
+  var data1 = temp.substring(0,2);    //0 Outbox      data1
+  var data2 = temp.substring(2,4);    //1 Hot Fin     data2
+  var data3 = temp.substring(4,6);    //2 Water       data3
+  var data4 = temp.substring(6,8);    //3 Systm       data4
+  var data5 = temp.substring(8,10);   //4 Inbox       data5 
+  var data6 = temp.substring(10,12);  //5 Cool Fin    data6
+  
+  console.log("length_data:  "+temp.length+"  |-->  "+data1+" "+data2+" "+data3+" "+data4+" "+data5+" "+data6);
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    db.createCollection(date_db, function(err, res) {
+      if (err) throw err;
+      // console.log("Collection created!");
+      db.close();
+    });
+    var myobj = [{ time:dd,temperature:data1,temperature2:data2,temperature3:data3,temperature4:data4,temperature5:data5,temperature6:data6}];
+    db.collection(date_db).insertMany(myobj, function(err, res) {
+      if (err) throw err;
+      // console.log("Number of documents inserted: " + res.insertedCount);
+      db.close();
+    });
+  }); 
+}
+//Read temp to Front  - End /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+function Readtemp_realtime()
+{
+
+  var myDate = new Date();
+  var dd = myDate.toString();
+  var y = dd.substring(11,15);
+  var m = dd.substring(4,7);
+  var d = dd.substring(8,10);
+  var date_db_date = y+m+d;
+  var date_db = date_db_date.toString();
+  // console.log( dd);
+  // console.log( y+m+d);
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var query = {};
+    var sort = { _id: -1 }
+    db.collection(date_db).find(query).sort(sort).toArray(function(err, result) {
+      if (err) throw err;
+      io.on('connection', function (socket,callback) {
+        // console.log("1 = " + result[0].temperature);
+        // console.log("2 = " + result[0].temperature2);
+        // console.log("3 = " + result[0].temperature3);
+        // console.log("4 = " + result[0].temperature4);
+        // console.log("5 = " + result[0].temperature5);
+        // console.log("6 = " + result[0].temperature6);
+
+        socket.emit('temp_realtime_data',{  tempareture:result[0].temperature
+          , tempareture2:result[0].temperature2
+          , tempareture3:result[0].temperature3
+          , tempareture4:result[0].temperature4
+          , tempareture5:result[0].temperature5
+          , tempareture6:result[0].temperature6
+
+        });
+        // console.log(result[0].temperature);
+      });
+      db.close();
+    });
+  });
+}
+//Control Relay//////////////////////////////////////////////////////////////////////////////
+function Ctrl_temp(callback)
+{
+  var query = {};
+  var sort = { _id: -1 }
+
+  var myDate = new Date();
+  var dd = myDate.toString();
+  var y = dd.substring(11,15);
+  var m = dd.substring(4,7);
+  var d = dd.substring(8,10);
+  var date_db_date = y+m+d;
+  var date_db = date_db_date.toString();
+  // console.log( dd);
+  // console.log( y+m+d);
+
+
+  MongoClient.connect(url, function(err, db,userdata,arduinodata) {
+    if (err) throw err;
+    db.collection(date_db).find(query).sort(sort).toArray(function(err, result) {
+      if (err) throw err;
+        // console.log(result[0].temperature);
+        Temp_data = result[0].temperature;
+        // console.log("DATA :"+Temp_data);
+        db.close();
+      });
+
+    db.collection("temp_collection").find(query).sort(sort).toArray(function(err, result) {
+      if (err) throw err;
+        // socket.emit('recive_timeupdate',{time:result[0].time});
+        Temp_user = result[0].user_temp;
+        // console.log("USER :"+Temp_user);
+        db.close();
+      });
+  });
+  // console.log("DATA"+Temp_data);
+  // console.log("USER"+Temp_user);
+  console.log("DATA :"+ Temp_data);
+  console.log("USER :"+ Temp_user);
+  if(Temp_data >= Temp_user)
+  {
+    console.log("ON");
+    writeSerialPort(sPort, "S", function()  {  
+     // console.log('Send-dataArduino----->');
+   })
+  }
+  else
+  {
+    console.log("OFF");
+    writeSerialPort(sPort, "s", function()  {  
+     // console.log('Send-dataArduino----->');
+   })
+    
+  }
+}
+//LOOP///////////////////////////////////////////////////////////////////////////////////////
+serialInit(function(_sPort)  {
+  if (sPort == -1)  return;
+  sPort = _sPort;
+  setInterval(function(){
+   writeSerialPort(sPort, "r", function()  {  
+     console.log('Send-dataArduino----->');
+   })
+   Ctrl_temp();
+ },1000*60)
+
+  setInterval(function(){
+   Readtemp_realtime();
+ },1000)
+})
+
+
+///////////////////////////////////////////////////////////////////////////////////
+
+//GPIO//////////////////////////////////////////////////////////////////////////
+// var Gpio = require('onoff').Gpio; //include onoff to interact with the GPIO
+// var LED = new Gpio(4, 'out'); //use GPIO pin 4, and specify that it is output
+// var blinkInterval = setInterval(blinkLED, 250); //run the blinkLED function every 250ms
+
+// function blinkLED() { //function to start blinking
+//   if (LED.readSync() === 0) { //check the pin state, if the state is 0 (or off)
+//     LED.writeSync(1); //set pin state to 1 (turn LED on)
+//   } else {
+//     LED.writeSync(0); //set pin state to 0 (turn LED off)
+//   }
+// }
+
+// function endBlink() { //function to stop blinking
+//   clearInterval(blinkInterval); // Stop blink intervals
+//   LED.writeSync(0); // Turn LED off
+//   LED.unexport(); // Unexport GPIO to free resources
+// }
+
+//setTimeout(endBlink, 5000); //stop blinking after 5 seconds 
+///////////////////////////////////////////////////////////////////////////////////
