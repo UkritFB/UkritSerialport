@@ -6,13 +6,14 @@
  var debug        = require('debug')('ukritsocket:server');
  var http         = require('http');
  var MongoClient  = require('mongodb').MongoClient;
-
  var serialPort   = require("serialport"); //for nodejs v4
  var sPort        = null;
-
  var Temp_user    = 0;
  var Temp_data    = 0;
- var event        =  require('events'); 
+ var os           = require('os');
+ var ifaces       = os.networkInterfaces();
+ var ip_address   =" ";
+
 // Connection URL
 var url           = 'mongodb://localhost:27017/tempcontrol_db';
 /**
@@ -40,8 +41,6 @@ var url           = 'mongodb://localhost:27017/tempcontrol_db';
 
 ///////////////////////////////////////////////////////////////////////////////////
 io.on('connection', function (socket,callback) {
-  event.EventEmitter.prototype._maxListeners = 100;
-
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;
     var query = {};
@@ -56,7 +55,6 @@ io.on('connection', function (socket,callback) {
       db.close();
     });
   }); 
-
   // socket.emit('Send-data-web', {data:da});
   socket.on('Recive-data-web', function (data) {
     console.log(data);
@@ -74,7 +72,6 @@ io.on('connection', function (socket,callback) {
         console.log("Number of documents inserted: " + res.insertedCount);
         db.close();
       });
-
       var query = {};
       var sort = { _id: -1 }
 
@@ -221,6 +218,7 @@ function serialList (callback)  {
       var portName = ports[i].comName;
       // if (portName == '/dev/ttyUSB0')  {
         if (portName == '/dev/ttyUSB0')  {
+                // if (portName == '/dev/ttyACM0')  {
         //console.log('Serial-list ->', portName);
         callback(portName);
         return;
@@ -301,7 +299,7 @@ function serialInit (callback) {
   })
 }
 //Save Temp Fron ////////////////////////////////////////////////////////////////////
-function SaveTemp(temp)
+function SaveTemp(temp,callback)
 {
   var myDate = new Date();
   var dd = myDate.toString();
@@ -341,7 +339,7 @@ function SaveTemp(temp)
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-function Readtemp_realtime()
+function Readtemp_realtime(callback)
 {
 
   var myDate = new Date();
@@ -357,7 +355,7 @@ function Readtemp_realtime()
     if (err) throw err;
     var query = {};
     var sort = { _id: -1 }
-    db.collection(date_db).find(query).sort(sort).toArray(function(err, result) {
+    db.collection("2018Mar27").find(query).sort(sort).toArray(function(err, result) {
       if (err) throw err;
       io.on('connection', function (socket,callback) {
         // console.log("1 = " + result[0].temperature);
@@ -367,7 +365,7 @@ function Readtemp_realtime()
         // console.log("5 = " + result[0].temperature5);
         // console.log("6 = " + result[0].temperature6);
 
-        socket.emit('temp_realtime_data',{  tempareture:result[0].temperature
+        socket.emit('temp_realtime_data',{tempareture:result[0].temperature
           , tempareture2:result[0].temperature2
           , tempareture3:result[0].temperature3
           , tempareture4:result[0].temperature4
@@ -400,7 +398,7 @@ function Ctrl_temp(callback)
 
   MongoClient.connect(url, function(err, db,userdata,arduinodata) {
     if (err) throw err;
-    db.collection(date_db).find(query).sort(sort).toArray(function(err, result) {
+    db.collection("2018Mar28").find(query).sort(sort).toArray(function(err, result) {
       if (err) throw err;
         // console.log(result[0].temperature);
         Temp_data = result[0].temperature;
@@ -436,23 +434,47 @@ function Ctrl_temp(callback)
     
   }
 }
+function ip_read(data,callback){
+  Object.keys(ifaces).forEach(function (ifname) {
+    var alias = 0;
+    ifaces[ifname].forEach(function (iface) {
+      if ('IPv4' !== iface.family || iface.internal !== false) {
+      // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+      return;
+    }
+
+    if (alias >= 1) {
+      // this single interface has multiple ipv4 addresses
+      console.log(ifname + ':' + alias, iface.address);
+    } else {
+      // this interface has only one ipv4 adress
+      // console.log( iface.address);
+      ip_address = iface.address;
+    }
+    ++alias;
+  });
+  });
+  writeSerialPort(sPort, ip_address, function()  {  
+   console.log('Send-dataArduino----->');
+ })
+}
+
+
 //LOOP///////////////////////////////////////////////////////////////////////////////////////
 serialInit(function(_sPort)  {
   if (sPort == -1)  return;
   sPort = _sPort;
-  setInterval(function(){
-   writeSerialPort(sPort, "r", function()  {  
-     console.log('Send-dataArduino----->');
-   })
-   Ctrl_temp();
- },1000*60)
-
-  setInterval(function(){
-   Readtemp_realtime();
- },1000)
 })
-
-
+setInterval(function(callback){
+ writeSerialPort(sPort, "r", function()  {  
+   console.log('Send-dataArduino----->');
+ })
+ Ctrl_temp();
+ ip_read();
+},1000*60)
+setInterval(function(callback){
+ Readtemp_realtime();
+},1000*30)
 ///////////////////////////////////////////////////////////////////////////////////
 
 //GPIO//////////////////////////////////////////////////////////////////////////
