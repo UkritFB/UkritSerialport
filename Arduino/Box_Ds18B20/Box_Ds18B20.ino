@@ -24,7 +24,7 @@ const byte sensorsAddress[SENSORS_NUM][8] PROGMEM = {
 
 
 int i = 0;
-char A;
+String A;
 int state = 1;
 
 String bb ;
@@ -42,12 +42,14 @@ void setup()
   Serial.begin(9600);
   digitalWrite(A0, HIGH);
   digitalWrite(A2, LOW);
-  analogReference(INTERNAL);
+  //  analogReference(INTERNAL);
 
   sensors.begin();
   sensors.request();
 
   lcd.begin();
+  lcd.setCursor(0, 3);
+  lcd.print("   Disconnect... ");
 }
 
 void loop()
@@ -71,7 +73,7 @@ void loop()
   lcd.print(data_int[4]);
 
   lcd.setCursor(0, 1);
-  lcd.print("OUT:");
+  lcd.print("OU :");
   lcd.print(data_int[0]);
 
   lcd.setCursor(0, 2);
@@ -79,7 +81,7 @@ void loop()
   lcd.print(data_int[2]);
 
   lcd.setCursor(9, 0);
-  lcd.print("SYS:");
+  lcd.print("SY :");
   lcd.print(data_int[3]);
 
   lcd.setCursor(9, 1);
@@ -89,9 +91,11 @@ void loop()
   lcd.setCursor(9, 2);
   lcd.print("FH :");
   lcd.print(data_int[1]);
+
+
   if (Serial.available() > 0)
   {
-    A = Serial.read();
+    A = Serial.readString();
     //
 
     if (A == 'R' || A == 'r')
@@ -113,6 +117,15 @@ void loop()
       if (A == 's')
       {
         digitalWrite(13, 0);
+      }
+      else
+      {
+        lcd.setCursor(0, 3);
+        lcd.print("               ");
+        lcd.setCursor(0, 3);
+        lcd.print("IP :");
+        lcd.setCursor(4, 3);
+        lcd.print(String(A.substring(4, 18)));
       }
 
     }
