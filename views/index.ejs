@@ -1,0 +1,87 @@
+<!-- 
+Ukrit Fongsomboon 
+Kobori4268@gmail.com 
+--> 
+
+
+<!DOCTYPE html>
+<html ng-app="scotchApp">
+  <head>
+    <title>Temp Control</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Dosis" rel="stylesheet"> 
+    <link rel="stylesheet" href="/stylesheets/style.css">
+
+    
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/series-label.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-route.js"></script>
+   <!-- <script src="/javascripts/page_change.js"></script>  -->
+
+  </head>
+  <body ng-app="myApp">
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+    <div class="toolbar">
+       <img  class="iconh" src="/images/myrtus.png" align="middle">
+       <a class="head">Temp Control</a>
+    </div>
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+    <div id="container"></div>
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+    <main>
+      <div>
+        <img  class="icon" src="/images/setting.png" align="middle">
+        <a>Setting Temparature & Humidit</a>
+        <br>
+      </div>
+      <br>
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+      <div>
+        <img  class="icon" src="/images/temp.png" align="middle">
+        <a>Temparature</a>
+        <a style="float: right;">Temp : <span id="demo"></span> &#8451;</a>
+      </div>
+      <center>
+        <div id="slidecontainer">
+          <input type="range" min="20" max="30" value="0" class="slider" id="myRange">
+        </div>
+      </center>
+      <br>
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+      <div>
+        <img  class="icon" src="/images/hum.png" align="middle">
+        <a> Humidit</a> 
+        <a style="float: right;">Hum : <span id="demo1"></span>%</a>
+      </div>
+      <center>
+        <div id="slidecontainer">
+          <input type="range" min="1" max="100" value="0" class="slider" id="myRange1">
+        </div>
+      </center>
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+      <center><button class="button" onclick="send_data()">Save</button></center>
+     <center> <a id="textupdate">Data Loading....</a></center>
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+<p><a href="#/!">Main</a></p>
+
+<a href="#!red"  ng-click ="gotoHome()">Red</a>
+<a href="#!green">Green</a>
+<a href="#!blue">Blue</a>
+
+<div ng-view></div>
+
+
+
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+    </main>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/javascripts/javascript.js"></script>
+  </body>
+</html>

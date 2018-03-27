@@ -1,0 +1,76 @@
+<!-- 
+Ukrit Fongsomboon 
+Kobori4268@gmail.com 
+--> 
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Temp Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+  <link href="https://fonts.googleapis.com/css?family=Dosis" rel="stylesheet"> 
+  <link rel="stylesheet" href="/stylesheets/style.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="/angular/angular.min.js"></script>
+  <script src="/angular/angular-route.js"></script>
+  <script src="/jquery/jquery.min.js"></script>
+  <!--  <script src="/angular/angular.min.js.map"></script> -->
+
+
+</head>
+<body >
+  <div class="toolbar">
+    <img  class="iconh" src="/images/myrtus.png" align="middle">
+    <a class="head">Temp Control</a>
+  </div>
+  <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+  <center><a ">In Box:</a>  <a class="tmp" >0<a >&#176;C</a></a></center>
+  <center><a >Out Box:</a>  <a class="tmp2" >0<a>&#176;C</a></a></center>
+  <center><a >Water:</a>   <a class="tmp3" >0<a>&#176;C</a></a></center>
+  <center><a >Cool Fin:</a>     <a class="tmp4" >0<a>&#176;C</a></a></center>
+  <center><a >Hot Fin:</a>  <a class="tmp5">0<a>&#176;C</a></a></center>
+  <center><a >System:</a><a class="tmp5">0<a>&#176;C</a></a></center>
+
+
+  <main>
+    <div>
+      <img  class="icon" src="/images/setting.png" align="middle">
+      <a>Setting Temparature & Humidit</a>
+      <br>
+    </div>
+    <br>
+    <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+    <div>
+      <img  class="icon" src="/images/temp.png" align="middle">
+      <a>Temparature</a>
+      <a style="float: right;">Temp : <span id="demo"></span> &#8451;</a>
+    </div>
+    <center>
+      <div id="slidecontainer">
+        <input type="range" min="20" max="30" value="0" class="slider" id="myRange">
+      </div>
+    </center>
+    <br>
+    <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+    <div> 
+      <img  class="icon" src="/images/hum.png" align="middle">
+      <a> Humidit</a> 
+      <a style="float: right;">Hum : <span id="demo1"></span>%</a>
+    </div>
+    <center>
+      <div id="slidecontainer">
+        <input type="range" min="1" max="100" value="0" class="slider" id="myRange1">
+      </div>
+    </center>
+    <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+    <center><button class="button" onclick="send_data()">Save</button></center>
+    <center> <a id="textupdate">Data Loading....</a></center>
+    <!-- //////////////////////////////////////////////////////////////////////////////////////////////// -->
+  </main>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/javascripts/javascript.js"></script>
+  <!--    <script src="/javascripts/page_change.js"></script> -->
+</body>
+</html>
